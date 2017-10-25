@@ -24,6 +24,68 @@ class NTPRefImplServerStats:
       self._hostname, pprint.pformat(self._auth))
 
 
+  def _parseInterfaceStatsString(self, statsString):
+    tokenEntries = [
+      'interface_number',
+      'interface_name',
+      'drop',
+      'flag',
+      'time_to_live',
+      'multicast',
+      'received',
+      'sent',
+      'failed',
+      'peers',
+      'uptime'
+    ]
+
+    print( "Stats string:\n{0}".format(statsString) )
+
+    # Break into array, one entry per line
+    statLinesArray = statsString.splitlines()
+
+    interfaces = {}
+    filterTokens = [ 'interface_number', 'interface_name' ]
+
+    # Start iterating below header lines
+    for i in range(4, len(statLinesArray), 2 ):
+      statTokens = statLinesArray[i].split()
+      interfaceAddress = statLinesArray[i+1].strip()
+
+      #print( "Address: {0}\n\tTokens: {1}".format(interfaceAddress, pprint.pformat(statTokens)))
+      parsedInterfaceTokens = {}
+
+      for tokenIndex in range(len(tokenEntries)):
+        parsedInterfaceTokens[tokenEntries[tokenIndex]] = statTokens[tokenIndex]
+
+      #pprint.pprint(parsedInterfaceTokens)
+
+      # Add to interfaces
+      if parsedInterfaceTokens['interface_name'] not in interfaces:
+        interfaces[ parsedInterfaceTokens['interface_name'] ] = {}
+
+      interfaces[ parsedInterfaceTokens['interface_name'] ][ interfaceAddress ] = {}
+      for interfaceToken in parsedInterfaceTokens.keys():
+        if interfaceToken not in filterTokens:
+          interfaces[ parsedInterfaceTokens['interface_name'] ][ interfaceAddress ][interfaceToken] = \
+            parsedInterfaceTokens[interfaceToken]
+
+      # If address has brackets, we have an IPv4 
+      if interfaceAddress[0] == "[":
+        ipVersion = 6
+      else:
+        ipVersion = 4
+
+      interfaces[ parsedInterfaceTokens['interface_name'] ][ interfaceAddress ]['ip_version'] = \
+        'IPv{0}'.format(ipVersion)
+
+      # break
+
+    pprint.pprint(interfaces)
+
+    return {}
+
+
   def getInterfaceStats(self):
     ntpqChild = pexpect.spawn("ntpq -c ifstats {0}".format(self._hostname))
     ntpqChild.expect("Keyid:")
@@ -32,10 +94,8 @@ class NTPRefImplServerStats:
     ntpqChild.sendline(self._auth['md5']['password'])
     ntpqChild.expect(pexpect.EOF)
 
-    return ntpqChild.before.decode('UTF-8')
+    return self._parseInterfaceStatsString( ntpqChild.before.decode('UTF-8') )
 
-    
-     
 
 
 def _parseArgs():
@@ -58,4 +118,4 @@ if __name__ == "__main__":
   #print( statsObj )
   stats = statsObj.getInterfaceStats()
 
-  print( "Stats: {0}".format(stats))
+  print( "Stats: {0}".format(pprint.pformat(stats)) )
