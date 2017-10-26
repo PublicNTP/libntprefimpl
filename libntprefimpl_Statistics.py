@@ -7,22 +7,14 @@ import pexpect
 import json
 
 
-class NTPRefImplServerStats:
-  def __init__(self, hostname, auth_type, auth_key_id, auth_password ):
-    self._hostname = hostname
+class NtpReferenceImplementation_Statistics:
 
-    # Validate authentication type
-    validAuthTypes = [ 'md5' ]
-    if auth_type in validAuthTypes:
-      self._auth = {}
-      self._auth[auth_type] = { 'key_id': auth_key_id, 'password': auth_password } 
-    else:
-      raise RuntimeError("Invalid authentication type ({0}), known types: {1}".format(
-        auth_type, pprint.pprint(validAuthTypes)))
+  def __init__(self, server);
+    self._server = server
 
   def __repr__(self):
-    return "NTPRefImplServerStats(hostname={0}, auth={1})".format(
-      self._hostname, pprint.pformat(self._auth))
+    return "NTPRefImplStats(hostname={0})".format(
+      self._server.getHostname())
 
 
   def _parseInterfaceStatsString(self, statsString):
@@ -92,11 +84,13 @@ class NTPRefImplServerStats:
 
 
   def getInterfaceStats(self):
+    authInfo = self._server.getAuthenticationInfo()
+
     ntpqChild = pexpect.spawn("ntpq -c ifstats {0}".format(self._hostname))
     ntpqChild.expect("Keyid:")
-    ntpqChild.sendline(str(self._auth['md5']['key_id']))
+    ntpqChild.sendline(str(authInfo['keyId']))
     ntpqChild.expect("MD5 Password:")
-    ntpqChild.sendline(self._auth['md5']['password'])
+    ntpqChild.sendline(authInfo['password'])
     ntpqChild.expect(pexpect.EOF)
 
     return self._parseInterfaceStatsString( ntpqChild.before.decode('UTF-8') )
@@ -212,6 +206,8 @@ def _parseArgs():
 
   parser.add_argument("hostname",       
     help="Hostname or IP address of remote NTP server")
+  parser.add_argument("stats_type",
+    help="What kind of stats to pull", choices=['interface', 'host'])
   parser.add_argument("auth_md5_key_id",    
     help="MD5 key ID to authenticate with remote NTP server",
     type=int )
@@ -225,6 +221,9 @@ if __name__ == "__main__":
   args = _parseArgs()
   statsObj = NTPRefImplServerStats(args.hostname, 'md5', args.auth_md5_key_id, args.auth_md5_password)
   #print( statsObj )
-  stats = statsObj.getHostStats()
+  if args.stats_type == 'host':
+    stats = statsObj.getHostStats()
+  else:
+    stats = statsObj.getInterfaceStats()
 
   print( json.dumps(stats, sort_keys=True, indent=4) )
