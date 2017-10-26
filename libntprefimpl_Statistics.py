@@ -1,15 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import print_function
-import argparse
 import pprint
 import pexpect
-import json
 
 
 class NtpReferenceImplementation_Statistics:
 
-  def __init__(self, server);
+  def __init__(self, server):
     self._server = server
 
   def __repr__(self):
@@ -84,9 +82,9 @@ class NtpReferenceImplementation_Statistics:
 
 
   def getInterfaceStats(self):
-    authInfo = self._server.getAuthenticationInfo()
+    authInfo = self._server.getAuthentication().getAuth()
 
-    ntpqChild = pexpect.spawn("ntpq -c ifstats {0}".format(self._hostname))
+    ntpqChild = pexpect.spawn("ntpq -c ifstats {0}".format(self._server.getHostname()))
     ntpqChild.expect("Keyid:")
     ntpqChild.sendline(str(authInfo['keyId']))
     ntpqChild.expect("MD5 Password:")
@@ -198,32 +196,3 @@ class NtpReferenceImplementation_Statistics:
          hostStats['statistics']['host']['sysstat']['uptime'] )
 
     return hostStats
-
-
-
-def _parseArgs():
-  parser = argparse.ArgumentParser(description="Pull stats from a Network Time Foundation NTP Reference Implementation server")
-
-  parser.add_argument("hostname",       
-    help="Hostname or IP address of remote NTP server")
-  parser.add_argument("stats_type",
-    help="What kind of stats to pull", choices=['interface', 'host'])
-  parser.add_argument("auth_md5_key_id",    
-    help="MD5 key ID to authenticate with remote NTP server",
-    type=int )
-  parser.add_argument("auth_md5_password",  
-    help="MD5 password we will use to authenticate with remote NTP server")
-
-  return parser.parse_args()
-
-
-if __name__ == "__main__":
-  args = _parseArgs()
-  statsObj = NTPRefImplServerStats(args.hostname, 'md5', args.auth_md5_key_id, args.auth_md5_password)
-  #print( statsObj )
-  if args.stats_type == 'host':
-    stats = statsObj.getHostStats()
-  else:
-    stats = statsObj.getInterfaceStats()
-
-  print( json.dumps(stats, sort_keys=True, indent=4) )

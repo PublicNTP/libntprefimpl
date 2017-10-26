@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-class NtpReferenceImplmentation_Authentication:
+class NtpReferenceImplementation_Authentication:
 
   _knownAuthTypes = {
     'md5'
