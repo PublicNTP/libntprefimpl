@@ -46,6 +46,7 @@ class NTPRefImplServerStats:
 
     interfaces = {}
     filterTokens = [ 'interface_number', 'interface_name' ]
+    stringTokens = [ 'drop' ]
 
     # Start iterating below header lines
     for i in range(4, len(statLinesArray), 2 ):
@@ -67,6 +68,9 @@ class NTPRefImplServerStats:
       interfaces[ parsedInterfaceTokens['interface_name'] ][ interfaceAddress ] = {}
       for interfaceToken in parsedInterfaceTokens.keys():
         if interfaceToken not in filterTokens:
+          if interfaceToken not in stringTokens:
+            parsedInterfaceTokens[interfaceToken] = int(parsedInterfaceTokens[interfaceToken])
+
           interfaces[ parsedInterfaceTokens['interface_name'] ][ interfaceAddress ][interfaceToken] = \
             parsedInterfaceTokens[interfaceToken]
 
@@ -81,9 +85,9 @@ class NTPRefImplServerStats:
 
       # break
 
-    pprint.pprint(interfaces)
+    #pprint.pprint(interfaces)
 
-    return {}
+    return interfaces
 
 
   def getInterfaceStats(self):
@@ -95,6 +99,14 @@ class NTPRefImplServerStats:
     ntpqChild.expect(pexpect.EOF)
 
     return self._parseInterfaceStatsString( ntpqChild.before.decode('UTF-8') )
+
+  def getHostStats(self):
+    hostStats = {
+      'hostname': self._hostname,
+      'statistics': { 'interface': self.getInterfaceStats(), 'host': {} }
+    }
+
+    return hostStats
 
 
 
@@ -116,6 +128,6 @@ if __name__ == "__main__":
   args = _parseArgs()
   statsObj = NTPRefImplServerStats(args.hostname, 'md5', args.auth_md5_key_id, args.auth_md5_password)
   #print( statsObj )
-  stats = statsObj.getInterfaceStats()
+  stats = statsObj.getHostStats()
 
   print( "Stats: {0}".format(pprint.pformat(stats)) )
