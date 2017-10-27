@@ -208,7 +208,7 @@ print( json.dumps(ntpServer.getStatistics().getHostStats(),
 
 # Licensing
 
-`libntprefimpl` is copyrighted by [PublicNTP, Inc.](https://publicntp.org), 
+`libntprefimpl` is copyrighted by [PublicNTP](https://publicntp.org), Inc., 
 open-sourced under the [MIT License](https://en.wikipedia.org/wiki/MIT_License). 
 
 Refer to 
