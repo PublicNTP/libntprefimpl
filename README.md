@@ -1,6 +1,6 @@
 # Introduction
 
-libntprefimpl enables easy interaction with NTP servers running the
+`libntprefimpl` enables easy interaction with NTP servers running the
 [NTP Reference Implementation](http://www.ntp.org/), maintained by the 
 [Network Time Foundation](https://nwtime.org/).
 
