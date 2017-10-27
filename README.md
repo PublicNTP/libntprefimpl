@@ -16,10 +16,7 @@
 #
 #Key Num   Key Type     Password
 #-------   --------     --------
-#65535     M            akey
-#1         M            pass
-
-321        M            md5password
+321        MD5          md5password
 ```
 
 ### /etc/ntp.conf
