@@ -8,20 +8,6 @@
 
 ## Server Configuration
 
-### /etc/ntp.conf
-
-```
-keys /etc/ntp.keys
-trustedkey 321
-controlkey 321
-requestkey 321
-
-# Allow all types of operations/requests that original from localhost
-restrict 127.0.0.1
-restrict ::1
-
-```
-
 ### /etc/ntp.keys
 
 ```
@@ -34,6 +20,21 @@ restrict ::1
 #1         M            pass
 
 321        M            md5password
+```
+
+### /etc/ntp.conf
+
+```
+keys /etc/ntp.keys
+
+trustedkey 321
+controlkey 321
+requestkey 321
+
+# Allow all types of operations/requests that original from localhost
+restrict 127.0.0.1
+restrict ::1
+
 ```
 
 ## Code
