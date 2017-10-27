@@ -15,6 +15,11 @@ keys /etc/ntp.keys
 trustedkey 321
 controlkey 321
 requestkey 321
+
+# Allow all types of operations/requests that original from localhost
+restrict 127.0.0.1
+restrict ::1
+
 ```
 
 ### /etc/ntp.keys
