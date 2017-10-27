@@ -2,6 +2,7 @@
 
 
 from __future__ import print_function
+import pprint
 
 
 class NtpReferenceImplementation_Authentication:
@@ -10,26 +11,38 @@ class NtpReferenceImplementation_Authentication:
   Retains the information about authentication type, key ID, and 
   password which is required for certain priviliged queries to an
   NTP Reference Implementation server.
+  
   """
 
-  
-  # Supported server authentication types
+  #: Supported server authentication types
   _knownAuthTypes = [
     'md5'
   ]
 
+  AUTH_TYPE_MD5 = _knownAuthTypes[0] #: Authentication type of "md5"
 
-  def __init__(self, server):
-    """Create new authentication object.
+  def __init__(self, serverHostname):
+    """Create new authentication object. 
 
     Arguments:
     ----------
-    server : :obj:`NtpReferenceImplementation`
-      Reference to the top-level object for the server
-
+    serverHostname : str
+      Hostname or IP of the server
+     
     """
-    self._server = server
     self._auth = None
+    self._serverName = serverHostname
+
+
+  def __repr__(self):
+    """String representation of the object. """
+    if self._auth is not None:
+      authString = pprint.pformat(self._auth)
+    else:
+      authString = "(not set)"
+
+    return "NtpReferenceImplementation_Authentication(hostname=\"{0}\", auth={1})".format(
+      self._serverName, authString)
 
 
   def setAuth(self, authType, authKeyId, authPassword):
@@ -38,7 +51,7 @@ class NtpReferenceImplementation_Authentication:
     Arguments:
     ----------
     authType : str
-      Type of authentication info (e.g., "md5")
+      Type of authentication info (e.g., AUTH_TYPE_MD5)
     authKeyId : int
       Which key ID the password pertains to
     authPassword : str
@@ -61,42 +74,78 @@ class NtpReferenceImplementation_Authentication:
     }
 
 
-  def getAuth(self, field=None):
-    """Retrieve the authentication info for this server.
-
-    Arguments:
-    ----------
-    field : str, optional
-      Which portion of authentication info to retrieve. 
- 
-      Valid values: `type`, `keyId`, `password`
+  def getAuth(self):
+    """Retrieve all authentication info for this server.
 
     Returns:
     --------
-    str, int, or :obj:`dict`
-      If `field` is specified, will return the requested portion of 
-      authentication info, else returns the entire dictionary with
-      structure:
-
+    :obj:`dict` or None
+      If authentication info has not been set, returns None.
+      Else, returns dictionary with structure:
       { 
-        "type": ...,
-        "keyId": ...,
-        "password": ...
+        "type": "md5",
+        "keyId": <int>,
+        "password": <str>
       }
-
-      Notes:
-      ------
-      If `field` is not one of the three valid values, a
-      `RuntimeException` will be thrown.
 
     """
     if self._auth is None:
       return None
 
-    if field is None:
-      return self._auth
-    
-    if field not in self._auth:
-      raise RuntimeError("Unknown auth field: {0}".format(field))
+    return self._auth
 
-    return self._auth[field]
+
+  def _getAuthField(self, authField):
+    """ Get one auth field
+
+    Arguments:
+    ----------
+    authFieldIndex : str
+      Valid key in `self._auth`
+
+    Returns:
+    --------
+    None or requested field
+      If auth has been set, returns specified field, else none
+
+    """
+    if self._auth is not None:
+      return self._auth[ authField ]
+    else:
+      return None
+
+
+  def getAuthType(self):
+    """ Get the authentication type set for this server
+
+    Returns:
+    --------
+      str or None
+        Returns authentication type if set, else None
+
+    """
+    return self._getAuthField('type')
+
+
+  def getAuthKeyId(self):
+    """ Get the authentication key ID set for this server
+
+    Returns:
+    --------
+      int or None
+        Returns authentication key id if set, else None
+
+    """
+    return self._getAuthField('keyId')
+
+
+  def getAuthPassword(self):
+    """ Get the authentication password set for this server
+
+    Returns:
+    --------
+      str or None
+        Returns authentication password if set, else None
+
+    """
+    return self._getAuthField('password')

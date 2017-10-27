@@ -1,21 +1,64 @@
 #!/usr/bin/python3
 
+
 from __future__ import print_function
 import pprint
 import pexpect
 
 
 class NtpReferenceImplementation_Statistics:
+  """Collects statistics from an NTP Reference Implementation server.
 
-  def __init__(self, server):
-    self._server = server
+  Used to retrieve detailed host/interface statistics from an 
+  NTP reference implementation server.
+  """
+
+
+  def __init__(self, serverHostname, serverAuth):
+    """Create new Statistics object
+
+    Arguments:
+    ----------
+    serverHostname : str
+      Name of the server these stats apply to
+    serverAuth : :obj:`NtpReferenceImplementation_Authentication`
+      Reference to object containing authentication information for the server 
+
+    """
+    self._serverHostname = serverHostname
+    self._serverAuth = serverAuth
+
 
   def __repr__(self):
+    """Generate string representation of this object, used for debugging.
+
+    Returns:
+    --------
+    str 
+      Format: "NTPRefImplStats(hostname=<hostname>)"
+    
+    """
     return "NTPRefImplStats(hostname={0})".format(
-      self._server.getHostname())
+      self._serverHostname ) 
 
 
   def _parseInterfaceStatsString(self, statsString):
+    """Parse multiline string with server stats into a dictionary.
+
+    Arguments:
+    ----------
+    statsString : str
+      Multiline string with detailed stats for each server interface
+
+    Returns:
+    --------
+    dict 
+      Key values are interface name, each entry is a dictionary
+      with a key per interface address for the interface,
+      and the value is detailed stats for that interface address
+
+    """
+    # Columns in a stats line
     tokenEntries = [
       'interface_number',
       'interface_name',
@@ -82,30 +125,56 @@ class NtpReferenceImplementation_Statistics:
 
 
   def getInterfaceStats(self):
-    authInfo = self._server.getAuthentication().getAuth()
+    """Retrieve detailed per-interface statistics.
 
-    ntpqChild = pexpect.spawn("ntpq -c ifstats {0}".format(self._server.getHostname()))
+    Returns:
+    --------
+    dict
+      Keys are interface names, values are dictionaries of 
+      interface address -> detailed stats
+    
+    """
+    pprint.pprint(self._serverAuth)
+    ntpqChild = pexpect.spawn( "ntpq -c ifstats {0}".format(self._serverHostname) )
     ntpqChild.expect("Keyid:")
-    ntpqChild.sendline(str(authInfo['keyId']))
+    ntpqChild.sendline( str(self._serverAuth.getAuthKeyId() ) )
     ntpqChild.expect("MD5 Password:")
-    ntpqChild.sendline(authInfo['password'])
-    ntpqChild.expect(pexpect.EOF)
+    ntpqChild.sendline( self._serverAuth.getAuthPassword() )
+    ntpqChild.expect( pexpect.EOF )
 
     return self._parseInterfaceStatsString( ntpqChild.before.decode('UTF-8') )
 
+
   def getSysstat(self):
+    """Get parsed results of a `ntpq -c sysstat` command. 
+    
+    Returns:
+    --------
+    dict
+      Parsed results of `sysstat` command
+    
+    """
     ntpqChild = pexpect.spawn("ntpq -c sysstat {0}".format(self._hostname))
     ntpqChild.expect(pexpect.EOF)
 
     return self._createDictionary(ntpqChild.before.decode('UTF-8').splitlines())
 
+
   def getKernelInfo(self):
+    """Get parsed results of an `ntpq -c kerninfo` command.
+
+    Returns:
+    --------
+    dict
+      Parsed results of `kerninfo` command
+
+    """
     ntpqChild = pexpect.spawn("ntpq -c kerninfo {0}".format(self._hostname))
     ntpqChild.expect(pexpect.EOF)
 
     linesToParse = ntpqChild.before.decode('UTF-8').splitlines()[1:]
 
-    # Fix calibration interval, missing a colon
+    # Fix calibration interval (string is missing a colon)
     for i in range(len(linesToParse)):
       if linesToParse[i].startswith("calibration interval") is True:
         linesToParse[i] = "calibration interval:{0}".format(
@@ -116,7 +185,22 @@ class NtpReferenceImplementation_Statistics:
 
 
   def _createDictionary(self, colonDelineatedLines):
+    """Parse multiple lines of colon-delimited statistics.
 
+    Arguments:
+    ----------
+    colonDelineatedLines : :obj:`list` of :obj:`str`
+      List of strings of type "description: value"
+
+    Returns:
+    --------
+    dict
+      Each row is parsed into a (key, value) pair, the key
+      being on left hand side of the colon, the value on
+      the right. Integers and floats are converted 
+      properly.
+
+    """ 
     returnDict = {}
     for currLine in colonDelineatedLines:
       #print( "processing {0}".format(currLine))
@@ -135,6 +219,15 @@ class NtpReferenceImplementation_Statistics:
 
 
   def getHostStats(self):
+    """Retrieve all stats available for a host.
+
+    Returns:
+    --------
+    dict
+      Full dictionary of data that can be obtained
+      for the server
+    
+    """
     hostStats = {
       'hostname': self._hostname,
       'statistics': { 

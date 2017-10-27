@@ -27,8 +27,10 @@ class NtpReferenceImplementation:
 
     """
     self._hostname  = hostname
-    self._stats     = libntprefimpl_Statistics.NtpReferenceImplementation_Statistics(self)
-    self._auth      = libntprefimpl_Authentication.NtpReferenceImplementation_Authentication(self)
+    self._auth      = libntprefimpl_Authentication.NtpReferenceImplementation_Authentication(
+      self.getHostname())
+    self._stats     = libntprefimpl_Statistics.NtpReferenceImplementation_Statistics(
+      self.getHostname(), self.getAuthentication() )
 
 
   def getHostname(self):
