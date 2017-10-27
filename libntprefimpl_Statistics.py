@@ -134,7 +134,6 @@ class NtpReferenceImplementation_Statistics:
       interface address -> detailed stats
     
     """
-    pprint.pprint(self._serverAuth)
     ntpqChild = pexpect.spawn( "ntpq -c ifstats {0}".format(self._serverHostname) )
     ntpqChild.expect("Keyid:")
     ntpqChild.sendline( str(self._serverAuth.getAuthKeyId() ) )

@@ -16,7 +16,9 @@ class NtpReferenceImplementation_Authentication:
 
   #: Supported server authentication types
   _knownAuthTypes = [
-    'md5'
+    'md5',
+    'sha',
+    'sha1'
   ]
 
   AUTH_TYPE_MD5 = _knownAuthTypes[0] #: Authentication type of "md5"
