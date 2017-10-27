@@ -54,7 +54,7 @@ print( json.dumps(ntpServer.getStatistics().getHostStats(),
 
 ```json
 {
-    "hostname": "ntp1.someorganization",
+    "hostname": "localhost",
     "statistics": {
         "host": {
             "kernel": {
