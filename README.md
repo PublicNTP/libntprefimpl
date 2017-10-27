@@ -208,9 +208,9 @@ print( json.dumps(ntpServer.getStatistics().getHostStats(),
 
 # Licensing
 
-`libntprefimpl` is licensed under the 
+`libntprefimpl` is copyrighted software, licensed under the 
 [MIT License](https://en.wikipedia.org/wiki/MIT_License). 
 
 Refer to 
 [LICENSE](https://github.com/PublicNTP/libntprefimpl/blob/master/LICENSE) 
-for the full license text and copyright statement.
+for more information.
