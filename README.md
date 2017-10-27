@@ -27,7 +27,7 @@ print( json.dumps(ntpServer.getStatistics().getHostStats(),
 
 ## Output
 
-```
+```json
 {
     "hostname": "ntp1.someorganization",
     "statistics": {
