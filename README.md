@@ -31,7 +31,7 @@ trustedkey 321
 controlkey 321
 requestkey 321
 
-# Allow all types of operations/requests that original from localhost
+# Allow all operations/requests from localhost
 restrict 127.0.0.1
 restrict ::1
 
