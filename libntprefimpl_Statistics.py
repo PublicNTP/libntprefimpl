@@ -154,7 +154,7 @@ class NtpReferenceImplementation_Statistics:
       Parsed results of `sysstat` command
     
     """
-    ntpqChild = pexpect.spawn("ntpq -c sysstat {0}".format(self._hostname))
+    ntpqChild = pexpect.spawn("ntpq -c sysstat {0}".format(self._serverHostname))
     ntpqChild.expect(pexpect.EOF)
 
     return self._createDictionary(ntpqChild.before.decode('UTF-8').splitlines())
@@ -169,7 +169,7 @@ class NtpReferenceImplementation_Statistics:
       Parsed results of `kerninfo` command
 
     """
-    ntpqChild = pexpect.spawn("ntpq -c kerninfo {0}".format(self._hostname))
+    ntpqChild = pexpect.spawn("ntpq -c kerninfo {0}".format(self._serverHostname))
     ntpqChild.expect(pexpect.EOF)
 
     linesToParse = ntpqChild.before.decode('UTF-8').splitlines()[1:]
@@ -229,7 +229,7 @@ class NtpReferenceImplementation_Statistics:
     
     """
     hostStats = {
-      'hostname': self._hostname,
+      'hostname': self._serverHostname,
       'statistics': { 
         'interfaces': self.getInterfaceStats(), 
         'host': {

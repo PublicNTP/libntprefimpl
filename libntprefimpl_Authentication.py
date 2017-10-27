@@ -45,32 +45,32 @@ class NtpReferenceImplementation_Authentication:
       self._serverName, authString)
 
 
-  def setAuth(self, authType, authKeyId, authPassword):
+  def setAuth(self, auth_type, key_id, password):
     """Set authentication information for this server.
 
     Arguments:
     ----------
-    authType : str
+    auth_type : str
       Type of authentication info (e.g., AUTH_TYPE_MD5)
-    authKeyId : int
+    key_id : int
       Which key ID the password pertains to
-    authPassword : str
+    password : str
       The password to validate with the server
 
     Notes:
     ------
-    If `authType` is not a supported authentication type, a 
+    If `auth_type` is not a supported authentication type, a 
       `RuntimeException` will be thrown
 
     """
       
-    if authType not in self._knownAuthTypes:
+    if auth_type not in self._knownAuthTypes:
       raise RuntimeError("Unknown auth type: {0}".format(authType))
 
     self._auth = {
-      'type'      : authType,
-      'keyId'     : authKeyId,
-      'password'  : authPassword
+      'type'      : auth_type,
+      'keyId'     : key_id,
+      'password'  : password
     }
 
 
